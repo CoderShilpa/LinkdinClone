@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import PostCard from '../components/PostCard.jsx';
 
 // Use the environment variable
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://linkdinclone-1.onrender.com/api';
 const API_POSTS_URL = `${API_BASE}/posts`; 
 
 const FeedPage = () => {
