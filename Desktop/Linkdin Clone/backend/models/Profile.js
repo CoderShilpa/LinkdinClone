@@ -1,32 +1,27 @@
 import mongoose from 'mongoose';
 
-const UserSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
+
+// Profile Schema define karna
+const profileSchema = new mongoose.Schema({
+    user: {
+       
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', 
         required: true,
         unique: true,
     },
-    password: {
+    bio: {
         type: String,
-        required: true,
+        default: '',
     },
-    // --- NEW FIELD FOR PROFILE PHOTO ---
-    avatar: {
-        type: String, // Stores the path to the user's uploaded profile photo
-        required: false,
-        default: null,
-    },
-    // -----------------------------------
-    date: {
+    
+    createdAt: {
         type: Date,
         default: Date.now,
     },
 });
 
-const User = mongoose.model('User', UserSchema);
 
-export default User;
+const Profile = mongoose.models.Profile || mongoose.model('Profile', profileSchema);
+
+export default Profile;

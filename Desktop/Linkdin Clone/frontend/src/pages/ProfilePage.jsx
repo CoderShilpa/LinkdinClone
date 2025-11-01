@@ -23,8 +23,7 @@ const ProfilePage = ({ navigate }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // Handlers passed down to PostCard (copied from FeedPage for consistency)
-    // NOTE: In a real app, you would probably move these to a custom hook or context.
+    // Handlers passed down to PostCard 
 
     const updatePostInState = (postId, updates) => {
         setPosts(prevPosts => 
@@ -123,13 +122,37 @@ const ProfilePage = ({ navigate }) => {
             const profileRes = await axios.get(API_PROFILE_URL, {
                 headers: { 'x-auth-token': token },
             });
-            setProfile(profileRes.data);
+
+            // Normalize the incoming data to match the expected state structure
+            const apiData = profileRes.data;
+            const normalizedProfile = {
+                // If the user object is missing (meaning the data is flat),
+                // create it using top-level name/email properties.
+                user: apiData.user || { name: apiData.name || '', email: apiData.email || '' },
+                bio: apiData.bio || 'No bio set yet.',
+                location: apiData.location || 'Earth',
+                social: apiData.social || {}
+            };
+            setProfile(normalizedProfile);
 
             // 2. Fetch User's Posts
             const postsRes = await axios.get(API_POSTS_URL, {
                 headers: { 'x-auth-token': token },
             });
-            setPosts(postsRes.data);
+            
+            // FIX: Ensure the data is an array before setting state
+            const postsData = postsRes.data;
+            if (Array.isArray(postsData)) {
+                 setPosts(postsData);
+            } else if (postsData && Array.isArray(postsData.posts)) {
+                // Handle case where API wraps the array in an object: { posts: [...] }
+                 setPosts(postsData.posts);
+            } else {
+                // If it's not an array (e.g., a single object or undefined), default to an empty array.
+                // Log a warning for unexpected API format.
+                console.warn("API for user posts returned non-array data:", postsData);
+                setPosts([]);
+            }
 
         } catch (err) {
             console.error("Error fetching profile/posts:", err);
@@ -171,10 +194,12 @@ const ProfilePage = ({ navigate }) => {
                     fontSize: '3em', 
                     margin: '0 auto 15px' 
                 }}>
-                    {profile.user.name ? profile.user.name[0] : 'U'}
+                    {/* Defensive rendering for name initial */}
+                    {profile.user?.name ? profile.user.name[0] : 'U'}
                 </div>
-                <h1 style={{ margin: 0, color: '#333' }}>{profile.user.name || 'Anonymous User'}</h1>
-                <p style={{ margin: '5px 0 15px', color: '#6c757d', fontSize: '1em' }}>{profile.user.email}</p>
+                {/* Defensive rendering for name */}
+                <h1 style={{ margin: 0, color: '#333' }}>{profile.user?.name || 'Anonymous User'}</h1>
+                <p style={{ margin: '5px 0 15px', color: '#6c757d', fontSize: '1em' }}>{profile.user?.email}</p>
                 
                 <p style={{ margin: '15px 0 0', padding: '10px', background: '#e9ecef', borderRadius: '6px', fontStyle: 'italic' }}>
                     **Bio:** {profile.bio}

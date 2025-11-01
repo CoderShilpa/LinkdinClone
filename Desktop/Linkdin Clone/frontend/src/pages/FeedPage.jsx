@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-// FIX: Assuming the path is correct relative to src/pages/
-// If context is in src/context, then '../context/AuthContext' is correct.
-// Since the error says 'Could not resolve', we keep the path but acknowledge the environment issue.
-// If your actual file structure is flat (e.g., all files in src/), you might need to adjust this.
 import { useAuth } from '../context/AuthContext';
 import PostCard from '../components/PostCard.jsx';
 
 // Use the environment variable
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const API_POSTS_URL = `${API_BASE}/posts`; 
 
 const FeedPage = () => {
@@ -40,7 +36,16 @@ const FeedPage = () => {
             const res = await axios.get(API_POSTS_URL, {
                 headers: { 'x-auth-token': token },
             });
-            setPosts(res.data);
+            
+            // --- FIX START ---
+            // If the backend returns an object like { posts: [...] }, use the posts array.
+            // If the backend returns an array directly, use it.
+            const postsData = Array.isArray(res.data) 
+                ? res.data 
+                : (res.data.posts || []); // Assuming the array might be nested inside 'posts' key
+                
+            setPosts(postsData);
+            // --- FIX END ---
         } catch (err) {
             console.error("Error fetching posts:", err);
             setError('Could not fetch posts. Try logging in again.');
@@ -194,7 +199,7 @@ const FeedPage = () => {
 
     return (
         <div style={{ maxWidth: '600px', margin: 'auto' }}>
-            {/* Post Creation Form (पोस्ट बनाने का फॉर्म) */}
+            {/* Post Creation Form */}
             <div style={{ marginBottom: '30px', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
                 <h3>Aapke mann mein kya hai? (What's on your mind?)</h3>
                 <form onSubmit={handlePostSubmit}>
@@ -212,13 +217,13 @@ const FeedPage = () => {
                         onMouseOver={(e) => e.target.style.backgroundColor = '#005f99'}
                         onMouseOut={(e) => e.target.style.backgroundColor = '#0077b5'}
                     >
-                        Post Karen (Post Now)
+                         (Post Now)
                     </button>
                 </form>
             </div>
 
-            {/* Post Feed (पोस्ट फ़ीड) */}
-            <h2>Haal ke Posts (Recent Posts)</h2>
+            {/* Post Feed */}
+            <h2>(Recent Posts)</h2>
             {posts.length > 0 ? (
                 posts.map((post) => (
                     <PostCard 
@@ -227,10 +232,10 @@ const FeedPage = () => {
                         currentUserId={user ? user.id : null} 
                         onDelete={handleDeletePost} 
                         onUpdate={handleUpdatePost} 
-                        onLike={handleLikePost} // लाइक हैंडलर पास किया गया
-                        onDislike={handleDislikePost} // डिसलाइक हैंडलर पास किया गया
-                        onAddComment={handleAddComment} // कमेंट ऐड हैंडलर पास किया गया
-                        onDeleteComment={handleDeleteComment} // कमेंट डिलीट हैंडलर पास किया गया
+                        onLike={handleLikePost} 
+                        onDislike={handleDislikePost} 
+                        onAddComment={handleAddComment} 
+                        onDeleteComment={handleDeleteComment} 
                     />
                 ))
             ) : (

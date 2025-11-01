@@ -1,28 +1,36 @@
-// backend/models/User.js
-
 import mongoose from 'mongoose';
-const { Schema, model } = mongoose;
 
-const UserSchema = new Schema({
-    name: {
+// User Schema define karna
+const userSchema = new mongoose.Schema({
+    username: {
         type: String,
         required: true,
+        unique: true,
+        trim: true,
     },
     email: {
         type: String,
         required: true,
         unique: true,
+        trim: true,
+        lowercase: true,
     },
     password: {
         type: String,
         required: true,
     },
-    date: {
+    profilePicture: {
+        type: String, // Public URL of the image
+        default: 'https://placehold.co/100x100/3182CE/FFFFFF?text=P',
+    },
+    createdAt: {
         type: Date,
         default: Date.now,
     },
 });
 
-const User = model('User', UserSchema);
+// Model ko export karte samay check karein ki 'User' model pehle se toh nahi bana hua hai
+// Agar bana hai toh use hi use karein, warna naya banayein
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 export default User;
