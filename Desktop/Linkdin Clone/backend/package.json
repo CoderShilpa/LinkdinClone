@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Linkdin Clone Backend",
   "main": "server.js",
-  "type": "module",  <-- **यह लाइन जोड़ें!**
+  "type": "module",  
   "scripts": {
     "start": "node server.js",
     "server": "nodemon server.js"
